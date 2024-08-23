@@ -79,7 +79,7 @@ fun AdvancedCounter(modifier: Modifier = Modifier) {
     var totalCambios by remember { mutableIntStateOf(0) }
     var historial = remember { mutableStateListOf<Pair<Int, Boolean>>() }
 
-    Column {
+    Column(modifier) {
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -97,12 +97,11 @@ fun AdvancedCounter(modifier: Modifier = Modifier) {
             ) {
                 IconButton(
                     onClick = {
-                        if (contador > 0) {
-                            contador--
-                            totalDecrementos++
-                            totalCambios++
-                            historial.add(Pair(contador, false))
-                        }
+                        contador--
+                        totalDecrementos++
+                        totalCambios++
+                        if (contador < valorMinimo) valorMinimo = contador
+                        historial.add(Pair(contador, false))
                     }
                 ) {
                     Box(
