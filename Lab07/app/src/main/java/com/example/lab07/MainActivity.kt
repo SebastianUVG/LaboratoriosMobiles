@@ -35,6 +35,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -104,38 +106,23 @@ fun VisualProgram(modifier: Modifier = Modifier) {
                     Row(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Button(
-                            onClick = { /* TODO */ },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent,
-                                contentColor = Color.Black
-                            ),
-                            modifier = Modifier
-                                .border(1.dp, Color.Black, RoundedCornerShape(16.dp))
-                                .size(width = 150.dp, height = 40.dp)
-                        ) {
-                            Text(
-                                text = "Informativas",
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        val selectedInformativas = remember { mutableStateOf(false) }
+                        val selectedCapacitaciones = remember { mutableStateOf(false) }
+
+                        FilterChip(
+                            selected = selectedInformativas.value,
+                            onClick = { selectedInformativas.value = !selectedInformativas.value },
+                            label = { Text("Informativas", fontWeight = FontWeight.Bold) },
+                            shape = RoundedCornerShape(16.dp)
+
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = { /* TODO */ },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Transparent,
-                                contentColor = Color.Black
-                            ),
-                            shape = RoundedCornerShape(16.dp),
-                            modifier = Modifier
-                                .border(1.dp, Color.Black, RoundedCornerShape(16.dp))
-                                .size(width = 150.dp, height = 40.dp)
-                        ) {
-                            Text(
-                                text = "Capacitaciones",
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        FilterChip(
+                            selected = selectedCapacitaciones.value,
+                            onClick = { selectedCapacitaciones.value = !selectedCapacitaciones.value },
+                            label = { Text("Capacitaciones", fontWeight = FontWeight.Bold) },
+                            shape = RoundedCornerShape(16.dp)
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
