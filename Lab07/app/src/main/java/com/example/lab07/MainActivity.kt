@@ -22,14 +22,16 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material3.Button
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Message
+import androidx.compose.material.icons.filled.PostAdd
+import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -39,7 +41,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +48,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lab07.ui.theme.Lab07Theme
+import java.text.SimpleDateFormat
+import java.util.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,35 +70,27 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
-// Define una lista de ejemplo para correos electrónicos
-val emails = listOf(
-    EmailData("Reunión", "Detalles de la reunión de mañana", "10:00 AM"),
-    EmailData("Oferta", "Nueva oferta de trabajo", "9:30 AM"),
-    EmailData("Evento", "Invitación a evento", "8:45 AM"),
-    EmailData("Tarea Pendiente","Por favor entregar la tarea que hace falta","8:45 AM")
-)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VisualProgram(modifier: Modifier = Modifier) {
+    var selectedNotificationType by remember { mutableStateOf<NotificationType?>(null) }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Notificaciones") },
+                title = { Text("Notificaciones", color = Color.Black) }, // Color fijo para el título
                 navigationIcon = {
                     IconButton(onClick = { /* Acción de navegación */ }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.Black)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Green // Color de fondo para TopAppBar
+                    containerColor = Color.Green
                 )
             )
         },
 
         content = { padding ->
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -98,35 +98,67 @@ fun VisualProgram(modifier: Modifier = Modifier) {
                     .padding(padding)
             ) {
                 Column(
-                    modifier = Modifier
-                        .padding(16.dp)
+                    modifier = Modifier.padding(16.dp)
                 ) {
-                    Text(text = "Tipo de notificaciones")
+                    Text(text = "Tipo de notificaciones", color = Color.Black) // Color fijo para el texto
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        val selectedInformativas = remember { mutableStateOf(false) }
-                        val selectedCapacitaciones = remember { mutableStateOf(false) }
-
-                        FilterChip(
-                            selected = selectedInformativas.value,
-                            onClick = { selectedInformativas.value = !selectedInformativas.value },
-                            label = { Text("Informativas", fontWeight = FontWeight.Bold) },
-                            shape = RoundedCornerShape(16.dp)
-
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        FilterChip(
-                            selected = selectedCapacitaciones.value,
-                            onClick = { selectedCapacitaciones.value = !selectedCapacitaciones.value },
-                            label = { Text("Capacitaciones", fontWeight = FontWeight.Bold) },
-                            shape = RoundedCornerShape(16.dp)
-                        )
+                        item {
+                            FilterChip(
+                                selected = selectedNotificationType == NotificationType.GENERAL,
+                                onClick = {
+                                    selectedNotificationType =
+                                        if (selectedNotificationType == NotificationType.GENERAL) null
+                                        else NotificationType.GENERAL
+                                },
+                                label = { Text("General", fontWeight = FontWeight.Bold, color = Color.Black) } // Color fijo
+                            )
+                        }
+                        item {
+                            FilterChip(
+                                selected = selectedNotificationType == NotificationType.NEW_POST,
+                                onClick = {
+                                    selectedNotificationType =
+                                        if (selectedNotificationType == NotificationType.NEW_POST) null
+                                        else NotificationType.NEW_POST
+                                },
+                                label = { Text("New Post", fontWeight = FontWeight.Bold, color = Color.Black) } // Color fijo
+                            )
+                        }
+                        item {
+                            FilterChip(
+                                selected = selectedNotificationType == NotificationType.NEW_MESSAGE,
+                                onClick = {
+                                    selectedNotificationType =
+                                        if (selectedNotificationType == NotificationType.NEW_MESSAGE) null
+                                        else NotificationType.NEW_MESSAGE
+                                },
+                                label = { Text("New Message", fontWeight = FontWeight.Bold, color = Color.Black) } // Color fijo
+                            )
+                        }
+                        item {
+                            FilterChip(
+                                selected = selectedNotificationType == NotificationType.NEW_LIKE,
+                                onClick = {
+                                    selectedNotificationType =
+                                        if (selectedNotificationType == NotificationType.NEW_LIKE) null
+                                        else NotificationType.NEW_LIKE
+                                },
+                                label = { Text("New Like", fontWeight = FontWeight.Bold, color = Color.Black) } // Color fijo
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    EmailList(emails = emails)
+                    val notifications = generateFakeNotifications()
+                    val filteredNotifications = selectedNotificationType?.let { type ->
+                        notifications.filter { it.type == type }
+                    } ?: notifications
+
+                    NotificationList(notifications = filteredNotifications)
                 }
             }
         }
@@ -134,49 +166,57 @@ fun VisualProgram(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun EmailList(emails: List<EmailData>) {
+fun NotificationList(notifications: List<Notification>) {
     LazyColumn(
         modifier = Modifier
             .clip(RoundedCornerShape(16.dp)) // Esquinas redondeadas
             .border(1.dp, Color.Black, RoundedCornerShape(16.dp))
-
-
     ) {
-        items(emails.size) { index ->
-            val email = emails[index]
-            EmailCard(
-                icon = {
-                    Icon(
-                        Icons.Filled.Email,
-                        contentDescription = null,
-                        modifier = Modifier.size(28.dp),
-                        tint = Color.Blue
-                    )
-                },
-                title = email.title,
-                subject = email.subject,
-                timestamp = email.timestamp
+        items(notifications.size) { index ->
+            val notification = notifications[index]
+            NotificationCard(
+                notification = notification,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp) // Espaciado entre las tarjetas
             )
         }
     }
 }
+@Composable
+fun getIconColor(): Color {
+    val isLightTheme = MaterialTheme.colorScheme.background == Color.White
+    return if (isLightTheme) Color.Black else Color.White
+}
 
 @Composable
-fun EmailCard(
-    icon: @Composable () -> Unit,
-    title: String,
-    subject: String,
-    timestamp: String,
+fun NotificationCard(
+    notification: Notification,
     modifier: Modifier = Modifier
 ) {
+    // Determina el color del ícono
+    val iconColor = getIconColor()
+    // Define el color de fondo basado en el tipo de notificación
+    val backgroundColor = when (notification.type) {
+        NotificationType.GENERAL -> Color.LightGray
+        NotificationType.NEW_POST -> Color.Blue
+        NotificationType.NEW_MESSAGE -> Color.Green
+        NotificationType.NEW_LIKE -> Color.Red
+    }
+
+    val icon = when (notification.type) {
+        NotificationType.GENERAL -> Icons.Filled.Email
+        NotificationType.NEW_POST -> Icons.Filled.PostAdd
+        NotificationType.NEW_MESSAGE -> Icons.Filled.Message
+        NotificationType.NEW_LIKE -> Icons.Filled.Favorite
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
-        //elevation = CardDefaults.cardElevation(4.dp),
-
     ) {
         Row(
             modifier = Modifier
@@ -184,17 +224,22 @@ fun EmailCard(
                 .padding(16.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Box(
                 modifier = Modifier
                     .size(48.dp)
                     .background(
-                        color = Color.Red,
+                        color = backgroundColor,
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                icon()
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp),
+                    tint = iconColor
+                )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(
@@ -203,28 +248,28 @@ fun EmailCard(
             ) {
                 Row {
                     Text(
-                        text = title,
+                        text = notification.title,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        color = Color.Black // Color fijo para el texto
                     )
                     Text(
-                        text = timestamp,
+                        text = SimpleDateFormat("dd/MM/yyyy hh:mm a", Locale.getDefault()).format(notification.sendAt),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray,
+                        color = Color.Gray, // Color fijo para la fecha
                         textAlign = TextAlign.End
                     )
                 }
                 Text(
-                    text = subject,
+                    text = notification.body,
                     style = MaterialTheme.typography.bodyMedium,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.Black // Color fijo para el texto
                 )
             }
         }
     }
 }
-
-data class EmailData(val title: String, val subject: String, val timestamp: String)
 
 @Preview(showBackground = true)
 @Composable
